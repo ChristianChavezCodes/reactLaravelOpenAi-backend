@@ -9,7 +9,15 @@ class ExampleController extends Controller
     protected $httpClient;
     public function __construct()
     {
-        $this->httpClient = new Client([
+        $this->httpChatClient = new Client([
+            'base_uri' => 'https://api.openai.com/v1/',
+            'headers' => [
+                'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+                'Content-Type' => 'application/json',
+            ],
+        ]);
+
+        $this->httpDalleClient = new Client([
             'base_uri' => 'https://api.openai.com/v1/',
             'headers' => [
                 'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
@@ -25,27 +33,35 @@ class ExampleController extends Controller
         $keys = array_map(function ($value) {
             return str_replace('_', ' ', $value);
         }, $keys);
-
         $userTextInput = $keys[0];
+
         $message = "Input: '{$userTextInput}'";
+
+        $image = $this->httpDalleClient->post('images/generations', [
+            'json' => [
+                'prompt' => "{$message}. Pixel art",
+                'n' => 1,
+                'size' => '256x256',
+            ],
+        ]);
                     
-        $response = $this->httpClient->post('chat/completions', [
+        $response = $this->httpChatClient->post('chat/completions', [
             'json' => [
                 'model' => 'gpt-3.5-turbo',
                 'messages' => [
-                    ['role' => 'system', 'content' => "You are a helpful chat bot for the following website: 'https://soaren.io/'. You will assist
-                      the user in a friendly and concise manner with whatever questions they may have. The questions will always pertain to the company Soaren Management."],
-                    ['role' => 'user', 'content' => 'Where are the Arizona offices located?'],
-                    ['role' => 'assistant', 'content' => 'The Arizona offices are located in the following address: 7020 E Acoma Dr 
-                    Scottsdale, AZ 85254.  Anything else I can assist you with today?'],
+                    ['role' => 'system', 'content' => "You are a helpful tutor for organic chemistry. You will assist the user in a concise manner with whatever questions they may have."],
+                    ['role' => 'user', 'content' => 'How many carbon atoms are in propane?'],
+                    ['role' => 'assistant', 'content' => 'There are three carbon atoms in propane'],
                     ['role' => 'user', 'content' => $message],
                 ],
-                'max_tokens' => 1000
+                'max_tokens' => 1500
             ],
         ]);
-        $result = json_decode($response->getBody(), true)['choices'][0]['message']['content'];
 
-        return $result;
+        $imageResult = json_decode($image->getBody(), true)['data'][0]['url'];
+        $chatResult = json_decode($response->getBody(), true)['choices'][0]['message']['content'];
+
+        return [$chatResult, $imageResult];
 
         /*  
             The responses are going to be slow when they load on the front-end.
