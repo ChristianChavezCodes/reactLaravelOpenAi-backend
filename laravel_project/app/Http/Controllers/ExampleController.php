@@ -49,9 +49,9 @@ class ExampleController extends Controller
             'json' => [
                 'model' => 'gpt-3.5-turbo',
                 'messages' => [
-                    ['role' => 'system', 'content' => "You are a helpful tutor for organic chemistry. You will assist the user in a concise manner with whatever questions they may have."],
-                    ['role' => 'user', 'content' => 'How many carbon atoms are in propane?'],
-                    ['role' => 'assistant', 'content' => 'There are three carbon atoms in propane'],
+                    ['role' => 'system', 'content' => "You are a pretentious know-it-all. You will assist the user in a concise manner with whatever questions they may have."],
+                    ['role' => 'user', 'content' => 'Who was the first president of the united states?'],
+                    ['role' => 'assistant', 'content' => "Really? You don't know? Ugh fine, I guess I will tell you. The first US president was George Washington"],
                     ['role' => 'user', 'content' => $message],
                 ],
                 'max_tokens' => 1500
